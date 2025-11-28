@@ -1,5 +1,4 @@
 import { GoogleGenAI, createPartFromUri, createUserContent } from "@google/genai";
-import { zodToJsonSchema } from "zod-to-json-schema";
 import { pcmToWav } from "./audio";
 import {
   FeelingAnalysis,
@@ -22,12 +21,12 @@ export async function analyzeFeelingFromAudio(
 ): Promise<FeelingAnalysis> {
   ensureApiKey();
 
+  const arrayBuffer = Uint8Array.from(audio).buffer;
+  const file = new Blob([arrayBuffer], { type: "audio/webm" });
+
   const uploaded = await ai.files.upload({
-    file: {
-      data: audio,
-      mimeType: "audio/webm",
-      displayName: "input.webm",
-    },
+    file,
+    config: { mimeType: "audio/webm", displayName: "input.webm" },
   });
 
   const response = await ai.models.generateContent({
@@ -42,7 +41,7 @@ export async function analyzeFeelingFromAudio(
     ]),
     config: {
       responseMimeType: "application/json",
-      responseSchema: zodToJsonSchema(FeelingAnalysisSchema),
+      responseSchema: FeelingAnalysisSchema,
     },
   });
 

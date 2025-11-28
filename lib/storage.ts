@@ -47,8 +47,8 @@ export async function getItems(limit = 20): Promise<GeneratedItem[]> {
   if (hasKv) {
     const ids = await kv.zrange(ZSET_KEY, -limit, -1, { rev: true });
     if (!ids.length) return [];
-    const items = await kv.mget<GeneratedItem>(
-      ids.map((id) => `item:${id}`)
+    const items = await kv.mget<GeneratedItem[]>(
+      ...ids.map((id) => `item:${id}`)
     );
     return items.filter((item): item is GeneratedItem => Boolean(item));
   }
